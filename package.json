@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "docker-dev-build": "docker-compose build"
+  }
+}
