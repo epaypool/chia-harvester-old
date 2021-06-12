@@ -16,7 +16,7 @@ if [ ! -d "$CHIA_DIR/config"  ];then
      chia init
      chia init -c ./ca/testnet
      chia configure --testnet true
-     chia configure --set-farmer-peer chiat.epaypool.com:28447
+     chia configure --set-farmer-peer chiat.epaypool.com:8447
   else
      chia init
      chia init -c ./ca/mainnet
