@@ -1,25 +1,33 @@
-FROM ubuntu:latest
+## Install dependencies only when needed
+#FROM node:15-alpine AS deps
+## Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+#RUN apk add --no-cache libc6-compat
+#WORKDIR /app
+#COPY package.json package-lock.json ./
+#RUN npm ci
+#
+## Rebuild the source code only when needed
+#FROM node:15-alpine AS builder
+#WORKDIR /app
+#COPY ./src/ ./src/
+#COPY package.json tsconfig.json ./
+#COPY --from=deps /app/node_modules ./node_modules
+#RUN npm run build
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl jq python3 ansible tar bash ca-certificates git openssl unzip wget python3-pip sudo acl build-essential python3-dev python3.8-venv python3.8-distutils apt nfs-common python-is-python3 vim tzdata
-RUN apt install -y net-tools netcat
+FROM epaypool/chia-blockchain:latest
 
-EXPOSE 8555
-EXPOSE 8444
+EXPOSE 55400
 
-ENV plots_dir="/plots"
-ENV testnet="false"
-ENV LOG_LEVEL=INFO
-ARG BRANCH=latest
+#RUN apt-get install -y nodejs
 
-RUN echo "cloning ${BRANCH}"
-RUN git clone --branch ${BRANCH} https://github.com/Chia-Network/chia-blockchain.git \
-&& cd chia-blockchain \
-&& git submodule update --init mozilla-ca \
-&& chmod +x install.sh \
-&& /usr/bin/sh ./install.sh
+#COPY --from=builder /app/dist/ ./app/dist/
+#COPY --from=builder /app/node_modules ./app/node_modules
 
-WORKDIR /chia-blockchain
-ADD ./entrypoint.sh entrypoint.sh
-RUN mkdir -p ~/.chia/mainnet/ && echo ${BRANCH} >> branch
+ENV LOG_LEVEL=WARN
+VOLUME /root/.chia
+
+# epaypool testnet and mainnet ca certificates
+ADD ./ca ./ca
+ADD ./entrypoint.sh ./entrypoint.sh
 
 ENTRYPOINT ["bash", "./entrypoint.sh"]

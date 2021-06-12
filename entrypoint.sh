@@ -1,14 +1,29 @@
+#!/bin/sh
+
 #set -x
 
 cd /chia-blockchain
 
+CHIA_DIR="/root/.chia/mainnet"
+
 . ./activate
 
-chia init
-if [[ ${testnet} == 'true' ]]; then
-   echo "configure testnet"
-   chia configure --testnet true
-   chia configure --set-farmer-peer 62.171.170.55:28447
+
+# This should run only once
+if [ ! -d "$CHIA_DIR/config"  ];then
+  if [[ ${testnet} == 'true' ]]; then
+     echo "configure testnet"
+     chia init
+     chia init -c ./ca/testnet
+     chia configure --testnet true
+     chia configure --set-farmer-peer chiat.epaypool.com:28447
+  else
+     chia init
+     chia init -c ./ca/mainnet
+     chia configure --set-farmer-peer chiam.epaypool.com:8447
+  fi
+else
+  echo "$CHIA_DIR already exists"
 fi
 
 # https://github.com/Chia-Network/chia-blockchain/wiki/FAQ#why-does-my-node-have-no-connections-how-can-i-get-more-connections
@@ -33,13 +48,12 @@ for p in ${plots_dir//:/ }; do
     chia plots add -d ${p}
 done
 
+# we need to replace for docker
 sed -i 's/localhost/127.0.0.1/g' ~/.chia/mainnet/config/config.yaml
-# allow for port forward using cloudflare of full node
-sed -i 's/self_hostname: 127.0.0.1/self_hostname: 0.0.0.0/g' ~/.chia/mainnet/config/config.yaml
 # we need to correct config to proper target address
 sed -i 's/xch_target_address: .*/xch_target_address: txch1z9ne4kgxwwuusfgsqx5s745c7zfd5j70nf46sa7l6je2tgcfwunq2fw63n/g' ~/.chia/mainnet/config/config.yaml
 
 chia start harvester
 
 
-trap : TERM INT; sleep 9999999999d & wait
+tail -f ~/.chia/mainnet/log/debug.log
