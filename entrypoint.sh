@@ -54,6 +54,8 @@ done
 
 # we need to replace for docker
 sed -i 's/localhost/127.0.0.1/g' ~/.chia/mainnet/config/config.yaml
+# allow to connect for plots monitor
+sed -i 's/self_hostname: 127.0.0.1/self_hostname: 0.0.0.0/g' ~/.chia/mainnet/config/config.yaml
 # we need to correct config to proper target address
 sed -i 's/xch_target_address: .*/xch_target_address: txch1z9ne4kgxwwuusfgsqx5s745c7zfd5j70nf46sa7l6je2tgcfwunq2fw63n/g' ~/.chia/mainnet/config/config.yaml
 
