@@ -16,14 +16,18 @@ if [ ! -d "$CHIA_DIR/config"  ];then
      chia init
      chia init -c ./ca/testnet
      chia configure --testnet true
-     chia configure --set-farmer-peer chiat.epaypool.com:8447
   else
      chia init
      chia init -c ./ca/mainnet
-     chia configure --set-farmer-peer chiam.epaypool.com:8447
   fi
 else
   echo "$CHIA_DIR already exists"
+fi
+
+if [[ ${testnet} == 'true' ]]; then
+  chia configure --set-farmer-peer chiat.epaypool.com:8447
+else
+  chia configure --set-farmer-peer chiam.epaypool.com:8447
 fi
 
 # https://github.com/Chia-Network/chia-blockchain/wiki/FAQ#why-does-my-node-have-no-connections-how-can-i-get-more-connections
